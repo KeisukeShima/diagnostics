@@ -15,6 +15,11 @@
 #ifndef REDUNDANCY_GROUP_ANALYZER__REDUNDANCY_GROUP_HPP__
 #define REDUNDANCY_GROUP_ANALYZER__REDUNDANCY_GROUP_HPP__
 
+#include <string>
+#include <memory>
+#include <vector>
+#include <map>
+
 #include "rclcpp/rclcpp.hpp"
 #include "diagnostic_aggregator/analyzer.hpp"
 #include "diagnostic_aggregator/status_item.hpp"
@@ -26,7 +31,8 @@
 namespace redundancy_group_analyzer
 {
 
-using namespace diagnostic_aggregator;
+using diagnostic_aggregator::Analyzer;
+using diagnostic_aggregator::StatusItem;
 
 class RedundancyGroup : public Analyzer
 {

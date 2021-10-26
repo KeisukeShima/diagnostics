@@ -12,12 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <string>
+#include <map>
+#include <memory>
+#include <vector>
+#include <algorithm>
+
 #include "redundancy_group_analyzer/redundancy_group.hpp"
 
 PLUGINLIB_EXPORT_CLASS(redundancy_group_analyzer::RedundancyGroup, diagnostic_aggregator::Analyzer)
 
 namespace redundancy_group_analyzer
 {
+
+using diagnostic_aggregator::valToMsg;
+
 RedundancyGroup::RedundancyGroup()
 : path_(""),
   nice_name_(""),
