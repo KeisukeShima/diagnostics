@@ -1,24 +1,24 @@
 analyzers:
   ros__parameters:
     path: Analysis
-    arms:
-      type: diagnostic_aggregator/GenericAnalyzer
-      path: Arms
-      startswith: [ '/arms' ]
-    legs:
-      type: diagnostic_aggregator/GenericAnalyzer
-      path: Legs
-      startswith: [ '/legs' ]
-    sensors:
-      type: diagnostic_aggregator/GenericAnalyzer
-      path: Motors
-      startswith: [ '/sensors' ]
-    motors:
-      type: diagnostic_aggregator/GenericAnalyzer
-      path: Motors
-      contains: [ '/motor' ]
+    # arms:
+    #   type: diagnostic_aggregator/GenericAnalyzer
+    #   path: Arms
+    #   startswith: [ '/arms' ]
+    # legs:
+    #   type: diagnostic_aggregator/GenericAnalyzer
+    #   path: Legs
+    #   startswith: [ '/legs' ]
+    # sensors:
+    #   type: diagnostic_aggregator/GenericAnalyzer
+    #   path: Motors
+    #   startswith: [ '/sensors' ]
+    # motors:
+    #   type: diagnostic_aggregator/GenericAnalyzer
+    #   path: Motors
+    #   contains: [ '/motor' ]
     topology:
-      type: 'diagnostic_aggregator/AnalyzerGroup'
+      type: 'redundancy_group_analyzer/RedundancyGroup'
       path: Topology
       analyzers:
         left:

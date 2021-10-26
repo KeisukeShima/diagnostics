@@ -86,13 +86,24 @@ class DiagnosticTalker(Node):
         self.array.status[3].message = 'OK'
         self.array.status[4].level = DiagnosticStatus.OK
         self.array.status[4].message = 'OK'
-        if level > .5:
-            self.array.status[1].level = DiagnosticStatus.WARN
-            self.array.status[1].message = 'Warning'
-        if level > .7:
+        if level > .2:
             self.array.status[3].level = DiagnosticStatus.WARN
-            self.array.status[3].message = 'Warning'
-        if level > .95:
+            self.array.status[3].message = 'Warn'
+            self.array.status[4].level = DiagnosticStatus.OK
+            self.array.status[4].message = 'OK'
+        if level > .4:
+            self.array.status[3].level = DiagnosticStatus.WARN
+            self.array.status[3].message = 'Warn'
+            self.array.status[4].level = DiagnosticStatus.WARN
+            self.array.status[4].message = 'Warn'
+        if level > .6:
+            self.array.status[3].level = DiagnosticStatus.WARN
+            self.array.status[3].message = 'Warn'
+            self.array.status[4].level = DiagnosticStatus.ERROR
+            self.array.status[4].message = 'Error'
+        if level > .8:
+            self.array.status[3].level = DiagnosticStatus.ERROR
+            self.array.status[3].message = 'Error'
             self.array.status[4].level = DiagnosticStatus.ERROR
             self.array.status[4].message = 'Error'
 

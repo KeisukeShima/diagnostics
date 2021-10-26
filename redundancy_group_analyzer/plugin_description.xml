@@ -1,0 +1,7 @@
+<library path="redundancy_group_analyzer" >
+  <class name="redundancy_group_analyzer/RedundancyGroup" type="redundancy_group_analyzer::RedundancyGroup" base_class_type="diagnostic_aggregator::Analyzer">
+    <description>
+      AnalyzerGroup is a way of grouping diagnostic analyzers. It is used internally by the aggregator, and can also be used as a plugin.
+    </description>
+  </class>
+</library>

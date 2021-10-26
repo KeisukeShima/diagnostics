@@ -1,63 +1,32 @@
-/*********************************************************************
- * Software License Agreement (BSD License)
- *
- *  Copyright (c) 2009, Willow Garage, Inc.
- *  All rights reserved.
- *
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions
- *  are met:
- *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
- *   * Redistributions in binary form must reproduce the above
- *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/or other materials provided
- *     with the distribution.
- *   * Neither the name of the Willow Garage nor the names of its
- *     contributors may be used to endorse or promote products derived
- *     from this software without specific prior written permission.
- *
- *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- *  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- *  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- *  POSSIBILITY OF SUCH DAMAGE.
- *********************************************************************/
+// Copyright 2021 Tier IV, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-/**! \author Kevin Watts */
-/**! \author Arne Nordmann */
+#include "redundancy_group_analyzer/redundancy_group.hpp"
 
-#include "diagnostic_aggregator/analyzer_group.hpp"
+PLUGINLIB_EXPORT_CLASS(redundancy_group_analyzer::RedundancyGroup, diagnostic_aggregator::Analyzer)
 
-#include <algorithm>
-#include <map>
-#include <memory>
-#include <string>
-#include <vector>
-
-PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::AnalyzerGroup, diagnostic_aggregator::Analyzer)
-
-namespace diagnostic_aggregator
+namespace redundancy_group_analyzer
 {
-using std::max;
-
-AnalyzerGroup::AnalyzerGroup()
+RedundancyGroup::RedundancyGroup()
 : path_(""),
   nice_name_(""),
   analyzer_loader_("diagnostic_aggregator", "diagnostic_aggregator::Analyzer"),
-  logger_(rclcpp::get_logger("AnalyzerGroup"))
+  logger_(rclcpp::get_logger("RedundancyGroup"))
 {
 }
 
-bool AnalyzerGroup::init(
+bool RedundancyGroup::init(
   const std::string & path, const std::string & breadcrumb, const rclcpp::Node::SharedPtr n)
 {
   RCLCPP_DEBUG(logger_, "init(%s, %s)", path.c_str(), breadcrumb.c_str());
@@ -174,7 +143,7 @@ bool AnalyzerGroup::init(
 
   if (analyzers_.size() == 0 && !nice_name_.empty()) {
     init_ok = false;
-    RCLCPP_ERROR(logger_, "No analyzers initialized in AnalyzerGroup '%s'", n->get_namespace());
+    RCLCPP_ERROR(logger_, "No analyzers initialized in RedundancyGroup '%s'", n->get_namespace());
   } else {
     RCLCPP_INFO(
       logger_, "Initialized analyzer group '%s' with path '%s' and breadcrumb '%s'.",
@@ -184,13 +153,13 @@ bool AnalyzerGroup::init(
   return init_ok;
 }
 
-AnalyzerGroup::~AnalyzerGroup()
+RedundancyGroup::~RedundancyGroup()
 {
   RCLCPP_DEBUG(logger_, "destructor");
   analyzers_.clear();
 }
 
-bool AnalyzerGroup::addAnalyzer(std::shared_ptr<Analyzer> & analyzer)
+bool RedundancyGroup::addAnalyzer(std::shared_ptr<Analyzer> & analyzer)
 {
   RCLCPP_INFO(
     logger_, "Adding analyzer '%s' to group '%s'.", analyzer->getName().c_str(),
@@ -199,7 +168,7 @@ bool AnalyzerGroup::addAnalyzer(std::shared_ptr<Analyzer> & analyzer)
   return true;
 }
 
-bool AnalyzerGroup::removeAnalyzer(std::shared_ptr<Analyzer> & analyzer)
+bool RedundancyGroup::removeAnalyzer(std::shared_ptr<Analyzer> & analyzer)
 {
   RCLCPP_DEBUG(logger_, "removeAnalyzer()");
   auto it = find(analyzers_.begin(), analyzers_.end(), analyzer);
@@ -210,7 +179,7 @@ bool AnalyzerGroup::removeAnalyzer(std::shared_ptr<Analyzer> & analyzer)
   return false;
 }
 
-bool AnalyzerGroup::match(const std::string & name)
+bool RedundancyGroup::match(const std::string & name)
 {
   RCLCPP_DEBUG(logger_, "Group '%s' match() %s", nice_name_.c_str(), name.c_str());
   if (analyzers_.size() == 0) {
@@ -248,17 +217,17 @@ bool AnalyzerGroup::match(const std::string & name)
   return match_name;
 }
 
-void AnalyzerGroup::resetMatches()
+void RedundancyGroup::resetMatches()
 {
   RCLCPP_DEBUG(logger_, "resetMatches()");
   matched_.clear();
 }
 
-bool AnalyzerGroup::analyze(const std::shared_ptr<StatusItem> item)
+bool RedundancyGroup::analyze(const std::shared_ptr<StatusItem> item)
 {
   RCLCPP_DEBUG(logger_, "analyze()");
   /* @todo(anordman):assertion ROS_ASSERT_MSG(get_logger(), matched_.count(
-      item->getName()), "AnalyzerGroup was asked to analyze an item it hadn't matched.");*/
+      item->getName()), "RedundancyGroup was asked to analyze an item it hadn't matched.");*/
 
   bool analyzed = false;
   std::vector<bool> & mtch_vec = matched_[item->getName()];
@@ -271,7 +240,7 @@ bool AnalyzerGroup::analyze(const std::shared_ptr<StatusItem> item)
   return analyzed;
 }
 
-std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> AnalyzerGroup::report()
+std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> RedundancyGroup::report()
 {
   RCLCPP_DEBUG(logger_, "report()");
   std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> output;
@@ -287,13 +256,14 @@ std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> AnalyzerGro
     output.push_back(header_status);
 
     if (header_status->name == "" || header_status->name == "/") {
-      header_status->name = "/AnalyzerGroup";
+      header_status->name = "/RedundancyGroup";
     }
 
     return output;
   }
 
   bool all_stale = true;
+  header_status->level = 3;
 
   for (auto j = 0u; j < analyzers_.size(); ++j) {
     std::string path = analyzers_[j]->getPath();
@@ -319,7 +289,7 @@ std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> AnalyzerGro
         kv.value = processed[i]->message;
 
         all_stale = all_stale && (processed[i]->level == 3);
-        header_status->level = max(header_status->level, processed[i]->level);
+        header_status->level = std::min(header_status->level, processed[i]->level);
         header_status->values.push_back(kv);
       }
     }
@@ -343,4 +313,4 @@ std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> AnalyzerGro
   return output;
 }
 
-}  // namespace diagnostic_aggregator
+}  // namespace redundancy_group_analyzer
