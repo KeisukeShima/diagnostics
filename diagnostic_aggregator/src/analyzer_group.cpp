@@ -42,6 +42,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <regex>
 
 PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::AnalyzerGroup, diagnostic_aggregator::Analyzer)
 
@@ -144,9 +145,7 @@ bool AnalyzerGroup::init(
         continue;
       }
 
-      if (an_type.compare("diagnostic_aggregator/AnalyzerGroup") == 0) {
-        an_path = path + "/" + an_path;
-      } else if (an_type.compare("redundancy_group_analyzer/RedundancyGroup") == 0) {
+      if (std::regex_search(an_type, std::regex("Group$"))) {
         an_path = path + "/" + an_path;
       } else {
         an_path = path;
