@@ -127,17 +127,18 @@ private:
   rclcpp::Node::SharedPtr n_;
 
   rclcpp::Logger logger_;
+  rclcpp::CallbackGroup::CallbackGroup::SharedPtr timer_group_;
   rclcpp::TimerBase::SharedPtr publish_timer_;
 
   /// AddDiagnostics, /diagnostics_agg/add_diagnostics
   rclcpp::Service<diagnostic_msgs::srv::AddDiagnostics>::SharedPtr add_srv_;
   /// DiagnosticArray, /diagnostics
+  rclcpp::CallbackGroup::CallbackGroup::SharedPtr sub_group_;
   rclcpp::Subscription<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr diag_sub_;
   /// DiagnosticArray, /diagnostics_agg
   rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr agg_pub_;
   /// DiagnosticStatus, /diagnostics_toplevel_state
   rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticStatus>::SharedPtr toplevel_state_pub_;
-  std::mutex mutex_;
   double pub_rate_;
   int history_depth_;
   rclcpp::Clock::SharedPtr clock_;

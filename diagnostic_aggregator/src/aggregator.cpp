@@ -100,17 +100,21 @@ Aggregator::Aggregator()
   other_analyzer_ = std::make_unique<OtherAnalyzer>(other_as_errors);
   other_analyzer_->init(base_path_);  // This always returns true
 
+  sub_group_ = n_->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
+  auto subscriber_option = rclcpp::SubscriptionOptions();
+  subscriber_option.callback_group = sub_group_;
   diag_sub_ = n_->create_subscription<DiagnosticArray>(
     "/diagnostics", rclcpp::SystemDefaultsQoS().keep_last(history_depth_),
-    std::bind(&Aggregator::diagCallback, this, _1));
+    std::bind(&Aggregator::diagCallback, this, _1), subscriber_option);
   agg_pub_ = n_->create_publisher<DiagnosticArray>("/diagnostics_agg", 1);
   toplevel_state_pub_ =
     n_->create_publisher<DiagnosticStatus>("/diagnostics_toplevel_state", 1);
 
+  timer_group_ = n_->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
   int publish_rate_ms = 1000 / pub_rate_;
   publish_timer_ = n_->create_wall_timer(
     std::chrono::milliseconds(publish_rate_ms),
-    std::bind(&Aggregator::publishData, this));
+    std::bind(&Aggregator::publishData, this), timer_group_);
 }
 
 void Aggregator::checkTimestamp(const DiagnosticArray::SharedPtr diag_msg)
@@ -141,19 +145,16 @@ void Aggregator::diagCallback(const DiagnosticArray::SharedPtr diag_msg)
   checkTimestamp(diag_msg);
 
   bool analyzed = false;
-  {  // lock the whole loop to ensure nothing in the analyzer group changes during it.
-    std::lock_guard<std::mutex> lock(mutex_);
-    for (auto j = 0u; j < diag_msg->status.size(); ++j) {
-      analyzed = false;
-      auto item = std::make_shared<StatusItem>(&diag_msg->status[j]);
+  for (auto j = 0u; j < diag_msg->status.size(); ++j) {
+    analyzed = false;
+    auto item = std::make_shared<StatusItem>(&diag_msg->status[j]);
 
-      if (analyzer_group_->match(item->getName())) {
-        analyzed = analyzer_group_->analyze(item);
-      }
+    if (analyzer_group_->match(item->getName())) {
+      analyzed = analyzer_group_->analyze(item);
+    }
 
-      if (!analyzed) {
-        other_analyzer_->analyze(item);
-      }
+    if (!analyzed) {
+      other_analyzer_->analyze(item);
     }
   }
 }
@@ -174,10 +175,7 @@ void Aggregator::publishData()
   int min_level = 255;
 
   std::vector<std::shared_ptr<DiagnosticStatus>> processed;
-  {
-    std::lock_guard<std::mutex> lock(mutex_);
-    processed = analyzer_group_->report();
-  }
+  processed = analyzer_group_->report();
   for (const auto & msg : processed) {
     diag_array.status.push_back(*msg);
 
